@@ -103,13 +103,13 @@ def _is_duplicate(job: dict, existing_keys: set[tuple]) -> bool:
 def start_scheduler():
     scheduler.add_job(
         run_pipeline,
-        trigger=IntervalTrigger(hours=1),
+        trigger=IntervalTrigger(hours=12),
         id="scrape_pipeline",
         name="Hospital Career Scrape Pipeline",
         replace_existing=True,
     )
     scheduler.start()
-    logger.info("[Scheduler] Pipeline scheduled — runs every hour.")
+    logger.info("[Scheduler] Pipeline scheduled — runs every 12 hours.")
 
     # Run immediately on startup so dashboard has data right away
     threading.Thread(target=run_pipeline, daemon=True).start()
