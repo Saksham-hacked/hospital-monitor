@@ -34,7 +34,7 @@ export default function Dashboard() {
       setNewJobs(j.jobs || []);
     } catch (e) {
       console.error(e);
-      setError("Failed to load dashboard data. Is the backend running?");
+      setError("Failed to load dashboard data. backend might take 50s to warm up");
     } finally {
       setLoading(false);
     }
