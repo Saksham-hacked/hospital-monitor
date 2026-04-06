@@ -111,7 +111,7 @@ export default function JobsTable() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
-              {["Job Title", "Hospital", "Department", "Location", "Type", "Summary", ""].map((h) => (
+              {["Job Title", "Hospital", "Department", "Location", "Type", "Summary", "Link"].map((h) => (
                 <th key={h} className="text-left px-4 py-3 text-xs font-mono text-muted uppercase tracking-wider">
                   {h}
                 </th>

@@ -95,9 +95,10 @@ Only add tokens you have verified return 200 from the public API.
 
 ## 6. Deploy
 
-**Backend** → Railway or Render  
-Start command: `uvicorn main:app --host 0.0.0.0 --port 8000`  
-Set env vars in the platform dashboard.
+**Backend** → Render  
+Root directory: `backend`  
+Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`  
+Set env vars (`GEMINI_API_KEY`, `SUPABASE_URL`, `SUPABASE_KEY`, `FRONTEND_URL`) in the Render dashboard under Environment.
 
 **Frontend** → Vercel  
 Set `VITE_API_URL` to your deployed backend URL (e.g. `https://your-app.railway.app/api`) in Vercel's Environment Variables dashboard before deploying.
