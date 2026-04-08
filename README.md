@@ -120,7 +120,7 @@ flowchart LR
         AF --> AI
         AG --> AI["Dashboard Page<br/>Run Now button"]
     end
-
+```
 ---
 
 ## Tech Stack
