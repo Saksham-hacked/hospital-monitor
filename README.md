@@ -50,6 +50,77 @@ hospital-monitor/
     └── package.json
 ```
 
+## System Architecture
+
+```mermaid
+flowchart LR
+
+    A["FastAPI App Startup"] --> B["Start APScheduler"]
+    B --> C["Run Pipeline Immediately (background thread)"]
+    B --> D["Scheduled Run Every 12 Hours"]
+
+    C --> E["run_pipeline()"]
+    D --> E
+
+    subgraph L1["1. Pipeline Initialization"]
+        E --> F["mark_jobs_old()<br/>Set previous is_new = false"]
+    end
+
+    subgraph L2["2. Data Collection"]
+        F --> G1["fetch_greenhouse_jobs()"]
+        F --> G2["fetch_lever_jobs()"]
+        G1 --> H["Combine into raw_jobs[]<br/>raw_text, hospital_name, job_url, source_url"]
+        G2 --> H
+    end
+
+    subgraph L3["3. Pre-AI Deduplication (Cost Control)"]
+        H --> I["make_content_hash(raw_text)<br/>for each raw job"]
+        I --> J["fetch_existing_keys() from Supabase<br/>(hospital_name, job_url, content_hash)"]
+        J --> K["Filter duplicates via _is_duplicate()"]
+        K --> L{"Any new_raw jobs?"}
+        L -->|No| M["Stop pipeline<br/>Skip Gemini + Skip summary"]
+        L -->|Yes| N["Send only new_raw to AI normalizer"]
+    end
+
+    subgraph L4["4. AI Normalization"]
+        N --> O["normalize_batch(new_raw)"]
+        O --> P["Async Gemini calls<br/>Semaphore concurrency = 5"]
+        P --> Q["Gemini 2.5 Flash extracts:<br/>job_title, department, location,<br/>job_type, experience_level,<br/>specialty, is_urgent,<br/>is_healthcare_role, ai_summary"]
+        Q --> R["Normalized jobs[]"]
+        R --> S["Filter non-healthcare roles"]
+        S --> T["healthcare_jobs[]"]
+    end
+
+    subgraph L5["5. Persistence"]
+        T --> U["upsert_job() into Supabase jobs table"]
+        U --> V["Collect successful inserts into new_jobs[]<br/>Set is_new = true"]
+        V --> W{"Any new_jobs inserted?"}
+        W -->|No| X["Stop pipeline<br/>Skip trend summary"]
+    end
+
+    subgraph L6["6. AI Trend Summarization"]
+        W -->|Yes| Y["generate_trend_summary(new_jobs)"]
+        Y --> Z["build_data_summary()<br/>Aggregate hospitals, departments,<br/>job types, specialties, urgent count"]
+        Z --> AA["Gemini generates 4–6 sentence hiring trend summary"]
+        AA --> AB["save_summary() into trend_summaries table"]
+    end
+
+    subgraph L7["7. API Layer"]
+        V --> AC["GET /api/jobs"]
+        AB --> AD["GET /api/summary"]
+        V --> AE["GET /api/stats/hospitals"]
+        V --> AF["GET /api/stats/departments"]
+        AG["POST /api/trigger"] --> E
+    end
+
+    subgraph L8["8. Frontend"]
+        AC --> AH["JobsTable Page<br/>Search, filters, only_new, links"]
+        AD --> AI["Dashboard Page<br/>AI summary"]
+        AE --> AI
+        AF --> AI
+        AG --> AI["Dashboard Page<br/>Run Now button"]
+    end
+
 ---
 
 ## Tech Stack
