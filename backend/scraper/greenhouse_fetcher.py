@@ -62,3 +62,14 @@ def fetch_greenhouse_jobs() -> list[dict]:
                 print(f"[Greenhouse] Error fetching {hospital['name']}: {e}")
 
     return all_jobs
+
+
+# {
+#     "hospital_name": "Vail Health",
+#     "raw_text": "Registered Nurse Medical Surgical Unit <first 300 chars of cleaned job content>",
+#     "job_url": "https://job-boards.greenhouse.io/.../jobs/1234567",
+#     "source_url": "https://boards-api.greenhouse.io/v1/boards/vailclinicincdbavailhealthhospital/jobs?content=true",
+#     "location": "Vail, CO",
+#     "extracted_at": "2026-04-08T10:15:23.456789+00:00",
+#     "source_type": "greenhouse",
+# }
